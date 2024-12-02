@@ -5,7 +5,7 @@ import { BookingService } from './booking.service';
 
 @Resolver(() => Booking)
 export class BookingResolver {
-  constructor(private readonly bookingService: BookingService) {}
+  constructor(private readonly bookingService: BookingService) { }
 
   @Query(() => [Booking], { name: 'bookings' })
   async getAllBookings(): Promise<Booking[]> {
@@ -21,7 +21,11 @@ export class BookingResolver {
   async createBooking(
     @Args('createBookingDto') createBookingDto: CreateBookingDto,
   ): Promise<Booking> {
-    return this.bookingService.createBooking(createBookingDto);
+    try {
+      return await this.bookingService.createBooking(createBookingDto);
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Mutation(() => Boolean)
