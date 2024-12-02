@@ -2,26 +2,31 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { IBookingDAO } from 'src/shared/contracts/dao/booking';
-import { Booking } from 'src/shared/entity/booking';
+import { Booking, BookingDocument } from 'src/shared/entity/booking';
+import { BookingMapper } from 'src/shared/system/documentToBook';
 
 @Injectable()
 export class BookingDAO implements IBookingDAO {
   constructor(
-    @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
-  ) { }
+    @InjectModel(BookingDocument.name)
+    private readonly bookingModel: Model<BookingDocument>,
+  ) {}
 
   async save(booking: Partial<Booking>): Promise<Booking> {
     const newBooking = new this.bookingModel(booking);
-    return await newBooking.save();
+    const savedBooking = await newBooking.save();
+    return BookingMapper.toBookingType(savedBooking);
   }
 
   async findAll(): Promise<Booking[]> {
-    return await this.bookingModel.find().exec();
+    const bookings = await this.bookingModel.find().exec();
+    return bookings.map(BookingMapper.toBookingType);
   }
 
   async findById(id: string): Promise<Booking | null> {
     const objectId = new Types.ObjectId(id);
-    return await this.bookingModel.findById(objectId).exec();
+    const booking = await this.bookingModel.findById(objectId).exec();
+    return booking ? BookingMapper.toBookingType(booking) : null;
   }
 
   async deleteById(id: string): Promise<void> {
@@ -29,13 +34,20 @@ export class BookingDAO implements IBookingDAO {
     await this.bookingModel.findByIdAndDelete(objectId).exec();
   }
 
-  async findConflicts(date: string, startTime: string, endTime: string): Promise<boolean> {
-    return !!(await this.bookingModel.findOne({
-      date,
-      $or: [
-        { startTime: { $lt: endTime, $gte: startTime } },
-        { endTime: { $gt: startTime, $lte: endTime } },
-      ],
-    }).exec());
+  async findConflicts(
+    date: string,
+    startTime: string,
+    endTime: string,
+  ): Promise<boolean> {
+    const conflict = await this.bookingModel
+      .findOne({
+        date,
+        $or: [
+          { startTime: { $lt: endTime, $gte: startTime } },
+          { endTime: { $gt: startTime, $lte: endTime } },
+        ],
+      })
+      .exec();
+    return !!conflict;
   }
 }

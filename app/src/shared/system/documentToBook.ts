@@ -1,8 +1,7 @@
-import { IBooking } from '../contracts/entity/booking';
-import { Booking } from '../entity/booking';
+import { Booking, BookingDocument } from '../entity/booking';
 
 export class BookingMapper {
-  static toBookingType(booking: IBooking): Booking {
+  static toBookingType(booking: BookingDocument): Booking {
     return {
       id: booking.id,
       user: booking.user,
