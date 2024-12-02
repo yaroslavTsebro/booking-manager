@@ -5,9 +5,14 @@ import { Booking, BookingSchema } from 'src/shared/entity/booking';
 import { BookingDAO } from './dao/booking.dao';
 import { BookingRepository } from './repository/booking.repository';
 import { BOOKING_REPOSITORY } from 'src/shared/contracts/repository/booking';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    MongooseModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({ uri: configService.get<string>('MONGO_URI') }),
+      inject: [ConfigService],
+    }),
     MongooseModule.forFeature([{ name: Booking.name, schema: BookingSchema }]),
   ],
   providers: [
@@ -22,4 +27,4 @@ import { BOOKING_REPOSITORY } from 'src/shared/contracts/repository/booking';
   ],
   exports: [BOOKING_REPOSITORY],
 })
-export class DataModule {}
+export class DataModule { }
