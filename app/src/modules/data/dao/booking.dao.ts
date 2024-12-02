@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { IBookingDAO } from 'src/shared/contracts/dao/booking';
 import { Booking } from 'src/shared/entity/booking';
 
@@ -8,7 +8,7 @@ import { Booking } from 'src/shared/entity/booking';
 export class BookingDAO implements IBookingDAO {
   constructor(
     @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
-  ) {}
+  ) { }
 
   async save(booking: Partial<Booking>): Promise<Booking> {
     const newBooking = new this.bookingModel(booking);
@@ -20,11 +20,13 @@ export class BookingDAO implements IBookingDAO {
   }
 
   async findById(id: string): Promise<Booking | null> {
-    return await this.bookingModel.findById(id).exec();
+    const objectId = new Types.ObjectId(id);
+    return await this.bookingModel.findById(objectId).exec();
   }
 
   async deleteById(id: string): Promise<void> {
-    await this.bookingModel.findByIdAndDelete(id).exec();
+    const objectId = new Types.ObjectId(id);
+    await this.bookingModel.findByIdAndDelete(objectId).exec();
   }
 
   async findConflicts(date: string, startTime: string, endTime: string): Promise<boolean> {

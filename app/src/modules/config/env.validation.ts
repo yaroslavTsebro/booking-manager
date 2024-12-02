@@ -7,7 +7,7 @@ export class EnvVariables {
   NODE_ENV: string;
 
   @IsNotEmpty()
-  @IsUrl({ require_tld: false }, { message: 'MONGO_URI must be a valid URL' })
+  @IsString()
   MONGO_URI: string;
 
   @IsNotEmpty()

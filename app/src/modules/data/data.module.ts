@@ -6,11 +6,13 @@ import { BookingDAO } from './dao/booking.dao';
 import { BookingRepository } from './repository/booking.repository';
 import { BOOKING_REPOSITORY } from 'src/shared/contracts/repository/booking';
 import { ConfigService } from '@nestjs/config';
+import { ConfigModule } from '../config/config.module';
 
 @Module({
   imports: [
+    ConfigModule,
     MongooseModule.forRootAsync({
-      useFactory: (configService: ConfigService) => ({ uri: configService.get<string>('MONGO_URI') }),
+      useFactory: (configService: ConfigService) => (console.log(configService.get<string>('MONGO_URI')),{ uri: configService.get<string>('MONGO_URI') }),
       inject: [ConfigService],
     }),
     MongooseModule.forFeature([{ name: Booking.name, schema: BookingSchema }]),
